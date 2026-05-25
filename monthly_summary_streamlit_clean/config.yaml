@@ -1,0 +1,70 @@
+# Streamlit-only Monthly XLSX -> Summary Reports
+# Secrets go in your own .env file, not here.
+
+project:
+  name: monthly-summary-generator
+  output_dir: outputs
+  default_year: 2026
+
+excel:
+  header_scan_rows: 100
+  category_header: Category
+  start_marker: "Date:"
+  end_markers:
+    - "SYS Engineering:"
+    - "SYS Engineering"
+  blockers_marker: Blockers
+  support_marker: Support Needed
+  support_clear_rows: 25
+  empty_streak_stop: 10
+  max_input_chars_per_team: 70000
+
+llm:
+  # options: ollama, ollama_openai, openai_compatible, offline
+  provider: ollama
+
+  # Local Ollama: http://localhost:11434
+  # Ollama Cloud/direct API: https://ollama.com  (set OLLAMA_API_KEY in .env)
+  base_url: ${OLLAMA_BASE_URL:-https://ollama.com}
+  api_key_env: OLLAMA_API_KEY
+
+  # Strong default setup.
+  summary_model: gpt-oss:120b-cloud
+  bigger_summary_model: gpt-oss:120b-cloud
+
+  fallback_models:
+    - gemma4:31b-cloud
+    - gemma4:26b
+    - gpt-oss:20b-cloud
+
+  temperature: 0.05
+  top_p: 0.9
+  num_ctx: 128000
+
+  # Increased so the model does not cut teams mid-section.
+  summary_max_tokens: 2500
+  bigger_summary_max_tokens: 5500
+
+  request_timeout_seconds: 900
+  retry_count: 2
+  request_sleep_seconds: 0.5
+  reasoning_effort: high
+  json_mode: true
+
+pdf:
+  # Exact May26-style: continuous flow, Times/serif font, no Management Attention section.
+  summary_title: Executive Summary Report
+  bigger_summary_title: Detailed Summary Report
+  one_team_per_page: false
+  font_family: times
+
+email:
+  enabled: false
+  smtp_host: ${SMTP_HOST:-smtp.gmail.com}
+  smtp_port: ${SMTP_PORT:-587}
+  smtp_user: ${SMTP_USER:-}
+  smtp_password: ${SMTP_PASSWORD:-}
+  email_from: ${EMAIL_FROM:-${SMTP_USER:-}}
+  email_to: ${EMAIL_TO:-}
+  subject: ${EMAIL_SUBJECT:-Monthly Summary Reports}
+  body: "Attached are the summary and bigger summary reports."
